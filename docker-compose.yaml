@@ -1,0 +1,47 @@
+services:
+  api:
+    container_name: app-api
+    build:
+      context: .
+      dockerfile: ./src/problem5/Dockerfile
+    command: npm run start
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=development
+      - APP_API_PORT=4000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=developer
+      - DB_PASS=codechallenge
+      - DB_NAME=resource_management
+      - SWAGGER_URL=http://localhost:4000/api
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+  postgres:
+    container_name: app-postgres
+    image: postgres:17.6
+    environment:
+      POSTGRES_USER: developer
+      POSTGRES_PASSWORD: codechallenge
+      POSTGRES_DB: resource_management
+    ports:
+      - "5423:5432" # Expose PostgreSQL on host port 5423 for local access this change will avoid conflict if you have local redis server running
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+volumes:
+  redisdata:
+  pgdata:
+
+networks:
+  app-network:
+    driver: bridge
